@@ -7,3 +7,10 @@ dist/
 .env
 .DS_Store
 .ipynb_checkpoints/
+.idea/
+.pytest_cache/
+*.pre-figshare-update
+
+# Local datasets
+*.pkl
+data/

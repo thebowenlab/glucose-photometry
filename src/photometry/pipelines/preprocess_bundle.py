@@ -36,6 +36,24 @@ def _as_time_series(values: list[Any]) -> pd.Series:
     return pd.Series(values)
 
 
+def _to_list(values: Any) -> list[Any]:
+    """Convert arrays/series to a list without ambiguous truth-value checks."""
+    if values is None:
+        return []
+    if isinstance(values, list):
+        return values.copy()
+    if isinstance(values, tuple):
+        return list(values)
+    if isinstance(values, pd.Series):
+        return values.tolist()
+    if isinstance(values, np.ndarray):
+        return np.ravel(values).tolist()
+    try:
+        return list(values)
+    except TypeError:
+        return [values]
+
+
 def _prepare_single_signal(
     *,
     raw_time: list[Any],
@@ -134,10 +152,14 @@ def prepare_bundle(
     """
     cfg = config or PrepareBundleConfig()
 
-    raw_t_fp = list(bundle.get("timestamps", {}).get("fp", []) or [])
-    raw_t_cgm = list(bundle.get("timestamps", {}).get("cgm", []) or [])
-    raw_fp = list(bundle.get("fp_data", {}).get("orig", []) or [])
-    raw_cgm = list(bundle.get("cgm_data", {}).get("orig", []) or [])
+    timestamps = bundle.get("timestamps", {}) or {}
+    fp_data = bundle.get("fp_data", {}) or {}
+    cgm_data = bundle.get("cgm_data", {}) or {}
+
+    raw_t_fp = _to_list(timestamps.get("fp", []))
+    raw_t_cgm = _to_list(timestamps.get("cgm", []))
+    raw_fp = _to_list(fp_data.get("orig", []))
+    raw_cgm = _to_list(cgm_data.get("orig", []))
 
     fp = _prepare_single_signal(
         raw_time=raw_t_fp,
