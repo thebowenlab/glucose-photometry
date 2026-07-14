@@ -98,3 +98,35 @@ sessions = load_sessions("trusted-local-legacy.pkl", trusted=True)
 python -m pip install pytest
 pytest -q
 ```
+
+## Core single-session analysis
+
+The reusable analysis port from the original `compute_ogtt_v5.py` workflow is in
+`photometry.analysis`. Numerical functions accept one canonical session at a time
+and return dictionaries containing scalar metrics and processed arrays. Cohort
+selection, result aggregation, and plotting remain the responsibility of an
+external driver script.
+
+```python
+from photometry import (
+    compute_glucose_metrics,
+    compute_session_cross_correlations,
+    generate_circular_shift_nulls,
+)
+
+session = load_sessions("/path/to/agrp-photometry-bg.pkl")[0]
+
+glucose = compute_glucose_metrics(session)
+coupling = compute_session_cross_correlations(session)
+shift_null = generate_circular_shift_nulls(session)
+```
+
+The core API includes:
+
+- glucose derivative, sustained-rise onset, peak detection, and incremental AUC;
+- early-template data preparation, lag/model fitting, prediction, and residualization;
+- FP-to-glucose and FP-to-glucose-derivative cross-correlation;
+- reproducible circular-shift null signals and correlation-null inference.
+
+See [`docs/core_analysis.md`](docs/core_analysis.md) for complete examples,
+including construction of externally selected fit and residual template banks.
