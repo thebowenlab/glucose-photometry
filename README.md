@@ -130,3 +130,17 @@ The core API includes:
 
 See [`docs/core_analysis.md`](docs/core_analysis.md) for complete examples,
 including construction of externally selected fit and residual template banks.
+
+## Generate representative figures
+
+After setting the dataset and output directories near the top of the script, run:
+
+```bash
+python scripts/generate_core_visualizations.py
+```
+
+The driver produces annotated single-session traces, dose and route heatmap-plus-
+average figures, glucose metric distributions, lagged-correlation summaries, and
+a session-level metrics CSV. Reusable plotting functions are exposed through
+`photometry.plotting`; cohort selection and output orchestration remain in the
+external script. See [`docs/visualizations.md`](docs/visualizations.md).
