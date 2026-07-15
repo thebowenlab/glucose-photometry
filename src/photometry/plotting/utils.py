@@ -40,19 +40,52 @@ def normalize_fp(
         hi = np.nanmax(fp)
         return (fp - lo) / (hi - lo + 1e-12)
 
+    if mode in {"percent", "percent_baseline"}:
+        if baseline_mask is not None and np.any(baseline_mask):
+            base_vals = fp[baseline_mask]
+        else:
+            base_vals = fp[np.isfinite(fp)]
+        baseline = float(np.nanmean(base_vals))
+        if not np.isfinite(baseline) or abs(baseline) < 1e-12:
+            return np.full_like(fp, np.nan, dtype=float)
+        return 100.0 * fp / baseline
+
+    if mode in {"delta", "baseline_subtract"}:
+        if baseline_mask is not None and np.any(baseline_mask):
+            base_vals = fp[baseline_mask]
+        else:
+            base_vals = fp[np.isfinite(fp)]
+        baseline = float(np.nanmean(base_vals))
+        return fp - baseline
+
     if mode == "raw" or mode == "none":
         return fp
 
-    raise ValueError("mode must be one of {'zscore', 'minmax', 'raw', 'none'}")
+    raise ValueError(
+        "mode must be one of {'zscore', 'minmax', 'percent', "
+        "'delta', 'raw', 'none'}"
+    )
 
 
 def sem(a: np.ndarray, axis: int = 0) -> np.ndarray:
     a = np.asarray(a, dtype=float)
-    n = np.sum(np.isfinite(a), axis=axis)
-    sd = np.nanstd(a, axis=axis, ddof=1)
-    out = sd / np.sqrt(np.maximum(n, 1))
-    out[~np.isfinite(out)] = np.nan
-    return out
+    finite = np.isfinite(a)
+    n = np.sum(finite, axis=axis)
+    mean = np.divide(
+        np.nansum(a, axis=axis),
+        n,
+        out=np.full(np.asarray(n).shape, np.nan, dtype=float),
+        where=n > 0,
+    )
+    expanded_mean = np.expand_dims(mean, axis=axis)
+    squared = np.where(finite, (a - expanded_mean) ** 2, 0.0)
+    variance = np.divide(
+        np.sum(squared, axis=axis),
+        n - 1,
+        out=np.full(np.asarray(n).shape, np.nan, dtype=float),
+        where=n > 1,
+    )
+    return np.sqrt(variance) / np.sqrt(np.maximum(n, 1))
 
 
 def interp_to_grid(

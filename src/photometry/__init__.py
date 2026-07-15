@@ -8,8 +8,18 @@ from photometry.io.bundles import (
 )
 from photometry.pipelines.preprocess_bundle import prepare_bundle, PrepareBundleConfig
 from photometry.metrics.photometry import time_to_peak_inhibition, compute_fp_peak_delta_z, auc_blocks, auc_blocks_from_cfg
-from photometry.plotting.group_average import build_matrix, compute_group_average, plot_group_average
-from photometry.plotting.comparison import plot_dataset_comparison, plot_two_group_bar
+from photometry.plotting import (
+    build_matrix,
+    compute_group_average,
+    plot_group_average,
+    plot_dataset_comparison,
+    plot_two_group_bar,
+    plot_session_summary,
+    prepare_session_matrix,
+    plot_multi_signal_summary,
+    plot_cross_correlation_summary,
+    plot_metrics_by_group,
+)
 
 from photometry.analysis import (
     GlucoseAnalysisConfig,
@@ -66,4 +76,9 @@ __all__ = [
     "plot_group_average",
     "plot_dataset_comparison",
     "plot_two_group_bar",
+    "plot_session_summary",
+    "prepare_session_matrix",
+    "plot_multi_signal_summary",
+    "plot_cross_correlation_summary",
+    "plot_metrics_by_group",
 ]
